@@ -992,7 +992,19 @@ public class InAppBrowser extends CordovaPlugin {
                 } catch (android.content.ActivityNotFoundException e) {
                     LOG.e(LOG_TAG, "Error sending sms " + url + ":" + e.toString());
                 }
-            }
+            } else if (url.startsWith("bankid:")) {
+				try	{
+					Intent intent = new Intent();
+					intent.setPackage("com.bankid.bus");
+					intent.setAction(Intent.ACTION_VIEW);
+					intent.setData(Uri.parse(url)) ;
+					cordova.getActivity().startActivity(intent);
+					return true;
+	            } catch (android.content.ActivityNotFoundException e) {
+                    LOG.e(LOG_TAG, "Error starting bankid " + url + ":" + e.toString());
+                }
+
+			}
             return false;
         }
 
