@@ -1122,5 +1122,23 @@ public class InAppBrowser extends CordovaPlugin {
             // By default handle 401 like we'd normally do!
             super.onReceivedHttpAuthRequest(view, handler, host, realm);
         }
+
+		@Override
+		public void onReceivedSslError(WebView view, SslErrorHandler handler, SslError error)
+		{
+			super.onReceivedSslError(view, handler, error);
+
+            try {
+                JSONObject obj = new JSONObject();
+                obj.put("type", LOAD_ERROR_EVENT);
+                obj.put("url", error.getUrl());
+                obj.put("code", error.getPrimaryError());
+                obj.put("message", "SSL Error");
+
+                sendUpdate(obj, true, PluginResult.Status.ERROR);
+            } catch (JSONException ex) {
+                LOG.d(LOG_TAG, "Should never happen");
+            }		
+		}
     }
 }
