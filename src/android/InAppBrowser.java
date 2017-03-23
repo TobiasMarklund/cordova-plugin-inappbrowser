@@ -93,6 +93,7 @@ public class InAppBrowser extends CordovaPlugin {
     private static final String SHOULD_PAUSE = "shouldPauseOnSuspend";
     private static final Boolean DEFAULT_HARDWARE_BACK = true;
     private static final String USER_WIDE_VIEW_PORT = "useWideViewPort";
+    private static final String TRUST_INSECURE_CERTS = "trustinsecurecerts";
 
     private InAppBrowserDialog dialog;
     private WebView inAppWebView;
@@ -107,6 +108,7 @@ public class InAppBrowser extends CordovaPlugin {
     private boolean mediaPlaybackRequiresUserGesture = false;
     private boolean shouldPauseInAppBrowser = false;
     private boolean useWideViewPort = true;
+	private boolean trustInsecureCerts = false;
     private ValueCallback<Uri> mUploadCallback;
     private ValueCallback<Uri[]> mUploadCallbackLollipop;
     private final static int FILECHOOSER_REQUESTCODE = 1;
@@ -531,6 +533,7 @@ public class InAppBrowser extends CordovaPlugin {
         showZoomControls = true;
         openWindowHidden = false;
         mediaPlaybackRequiresUserGesture = false;
+		trustInsecureCerts = false;
 
         if (features != null) {
             Boolean show = features.get(LOCATION);
@@ -571,6 +574,10 @@ public class InAppBrowser extends CordovaPlugin {
             Boolean wideViewPort = features.get(USER_WIDE_VIEW_PORT);
             if (wideViewPort != null ) {
 		            useWideViewPort = wideViewPort.booleanValue();
+            }
+            Boolean insecureCerts = features.get(TRUST_INSECURE_CERTS);
+            if (insecureCerts != null ) {
+				trustInsecureCerts = insecureCerts.booleanValue();
             }
         }
 
@@ -773,7 +780,7 @@ public class InAppBrowser extends CordovaPlugin {
                     }
 
                 });
-                WebViewClient client = new InAppBrowserClient(thatWebView, edittext);
+                WebViewClient client = new InAppBrowserClient(thatWebView, edittext, trustInsecureCerts);
                 inAppWebView.setWebViewClient(client);
                 WebSettings settings = inAppWebView.getSettings();
                 settings.setJavaScriptEnabled(true);
@@ -923,6 +930,7 @@ public class InAppBrowser extends CordovaPlugin {
     public class InAppBrowserClient extends WebViewClient {
         EditText edittext;
         CordovaWebView webView;
+		Boolean trustInsecureCerts;
 
         /**
          * Constructor.
@@ -930,9 +938,10 @@ public class InAppBrowser extends CordovaPlugin {
          * @param webView
          * @param mEditText
          */
-        public InAppBrowserClient(CordovaWebView webView, EditText mEditText) {
+        public InAppBrowserClient(CordovaWebView webView, EditText mEditText, Boolean trustInsecureCerts) {
             this.webView = webView;
             this.edittext = mEditText;
+			this.trustInsecureCerts = trustInsecureCerts;
         }
 
         /**
@@ -1128,6 +1137,11 @@ public class InAppBrowser extends CordovaPlugin {
 		@Override
 		public void onReceivedSslError(WebView view, SslErrorHandler handler, SslError error)
 		{
+			if (trustInsecureCerts) {
+				handler.proceed();
+				return;
+			}
+
 			super.onReceivedSslError(view, handler, error);
 
             try {
