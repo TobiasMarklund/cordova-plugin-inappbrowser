@@ -632,9 +632,9 @@ public class InAppBrowser extends CordovaPlugin {
             if (footerColorSet != null) {
                 footerColor = footerColorSet;
             }
-            Boolean insecureCerts = features.get(TRUST_INSECURE_CERTS);
+            String insecureCerts = features.get(TRUST_INSECURE_CERTS);
             if (insecureCerts != null ) {
-				trustInsecureCerts = insecureCerts.booleanValue();
+				trustInsecureCerts = insecureCerts.equals("yes") ? true : false;
             }
         }
 
