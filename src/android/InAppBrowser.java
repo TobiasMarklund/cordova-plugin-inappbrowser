@@ -92,6 +92,7 @@ public class InAppBrowser extends CordovaPlugin {
     private static final String LOAD_START_EVENT = "loadstart";
     private static final String LOAD_STOP_EVENT = "loadstop";
     private static final String LOAD_ERROR_EVENT = "loaderror";
+    private static final String LOAD_CUSTOM_SCHEME = "loadcustomscheme";
     private static final String CLEAR_ALL_CACHE = "clearcache";
     private static final String CLEAR_SESSION_CACHE = "clearsessioncache";
     private static final String HARDWARE_BACK_BUTTON = "hardwareback";
@@ -1133,12 +1134,13 @@ public class InAppBrowser extends CordovaPlugin {
                 }
 			} else if (url.startsWith("comtietoseedumobile:")) {
 				try {
-					Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
-					intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-					cordova.getActivity().startActivity(intent);
+                    JSONObject obj = new JSONObject();
+                    obj.put("type", LOAD_CUSTOM_SCHEME);
+                    obj.put("url", url);
+                    sendUpdate(obj, true);
 					return true;
-				} catch (android.content.ActivityNotFoundException e) {
-                    LOG.e(LOG_TAG, "Error starting custom url scheme " + url + ":" + e.toString());
+                } catch (JSONException ex) {
+                    LOG.e(LOG_TAG, "URI passed in has caused a JSON error.");
 				}
 			}
             return false;

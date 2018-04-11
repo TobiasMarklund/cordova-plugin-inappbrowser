@@ -36,6 +36,7 @@
             'loadstart': channel.create('loadstart'),
             'loadstop': channel.create('loadstop'),
             'loaderror': channel.create('loaderror'),
+            'loadcustomscheme': channel.create('loadcustomscheme'),
             'exit': channel.create('exit')
         };
     }
