@@ -1134,6 +1134,7 @@ public class InAppBrowser extends CordovaPlugin {
 			} else if (url.startsWith("comtietoseedumobile:")) {
 				try {
 					Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+					intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 					cordova.getActivity().startActivity(intent);
 					return true;
 				} catch (android.content.ActivityNotFoundException e) {
