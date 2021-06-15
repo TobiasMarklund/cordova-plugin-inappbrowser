@@ -116,6 +116,7 @@ public class InAppBrowser extends CordovaPlugin {
     private static final String FOOTER_COLOR = "footercolor";
     private static final String BEFORELOAD = "beforeload";
     private static final String FULLSCREEN = "fullscreen";
+    private static final String TRUST_INSECURE_CERTS = "trustinsecurecerts";
 
     private static final List customizableOptions = Arrays.asList(CLOSE_BUTTON_CAPTION, TOOLBAR_COLOR, NAVIGATION_COLOR, CLOSE_BUTTON_COLOR, FOOTER_COLOR);
 
@@ -146,6 +147,7 @@ public class InAppBrowser extends CordovaPlugin {
     private String beforeload = "";
     private boolean fullscreen = true;
     private String[] allowedSchemes;
+    private boolean trustInsecureCerts = false;
     private InAppBrowserClient currentClient;
 
     /**
@@ -629,6 +631,7 @@ public class InAppBrowser extends CordovaPlugin {
         showZoomControls = true;
         openWindowHidden = false;
         mediaPlaybackRequiresUserGesture = false;
+        trustInsecureCerts = false;
 
         if (features != null) {
             String show = features.get(LOCATION);
@@ -709,6 +712,10 @@ public class InAppBrowser extends CordovaPlugin {
             String fullscreenSet = features.get(FULLSCREEN);
             if (fullscreenSet != null) {
                 fullscreen = fullscreenSet.equals("yes") ? true : false;
+            }
+            String insecureCerts = features.get(TRUST_INSECURE_CERTS);
+            if (insecureCerts != null ) {
+                trustInsecureCerts = insecureCerts.equals("yes") ? true : false;
             }
         }
 
@@ -937,7 +944,7 @@ public class InAppBrowser extends CordovaPlugin {
                         return true;
                     }
                 });
-                currentClient = new InAppBrowserClient(thatWebView, edittext, beforeload);
+                currentClient = new InAppBrowserClient(thatWebView, edittext, beforeload, trustInsecureCerts);
                 inAppWebView.setWebViewClient(currentClient);
                 WebSettings settings = inAppWebView.getSettings();
                 settings.setJavaScriptEnabled(true);
@@ -1099,6 +1106,7 @@ public class InAppBrowser extends CordovaPlugin {
         CordovaWebView webView;
         String beforeload;
         boolean waitForBeforeload;
+        boolean trustInsecureCerts;
 
         /**
          * Constructor.
@@ -1106,11 +1114,12 @@ public class InAppBrowser extends CordovaPlugin {
          * @param webView
          * @param mEditText
          */
-        public InAppBrowserClient(CordovaWebView webView, EditText mEditText, String beforeload) {
+        public InAppBrowserClient(CordovaWebView webView, EditText mEditText, String beforeload, boolean trustInsecureCerts) {
             this.webView = webView;
             this.edittext = mEditText;
             this.beforeload = beforeload;
             this.waitForBeforeload = beforeload != null;
+            this.trustInsecureCerts = trustInsecureCerts;
         }
 
         /**
@@ -1383,6 +1392,11 @@ public class InAppBrowser extends CordovaPlugin {
 
         @Override
         public void onReceivedSslError(WebView view, SslErrorHandler handler, SslError error) {
+			if (trustInsecureCerts) {
+				handler.proceed();
+				return;
+			}
+
             super.onReceivedSslError(view, handler, error);
             try {
                 JSONObject obj = new JSONObject();
