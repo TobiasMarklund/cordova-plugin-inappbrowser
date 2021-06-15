@@ -1250,6 +1250,18 @@ public class InAppBrowser extends CordovaPlugin {
                     LOG.e(LOG_TAG, "Error sending sms " + url + ":" + e.toString());
                 }
             }
+            else if (url.startsWith("bankid:")) {
+                try	{
+                    Intent intent = new Intent();
+                    intent.setPackage("com.bankid.bus");
+                    intent.setAction(Intent.ACTION_VIEW);
+                    intent.setData(Uri.parse(url)) ;
+                    cordova.getActivity().startActivity(intent);
+                    return true;
+                } catch (android.content.ActivityNotFoundException e) {
+                    LOG.e(LOG_TAG, "Error starting bankid " + url + ":" + e.toString());
+                }
+            }
             // Test for whitelisted custom scheme names like mycoolapp:// or twitteroauthresponse:// (Twitter Oauth Response)
             else if (!url.startsWith("http:") && !url.startsWith("https:") && url.matches("^[A-Za-z0-9+.-]*://.*?$")) {
                 if (allowedSchemes == null) {
